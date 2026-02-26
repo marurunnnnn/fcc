@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>営業用 見積シミュレーター</title>
+<style>
+    /* 全ての要素でサイズ計算を「枠線込み」に統一する設定 */
+    * {
+        box-sizing: border-box;
+    }
+
+    body { 
+        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; 
+        background: #f0f2f5; 
+        padding: 15px; 
+        margin: 0; /* スマホでの不要な余白を防止 */
+    }
+
+    .card { 
+        background: white; 
+        padding: 25px; 
+        border-radius: 15px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        max-width: 450px; 
+        margin: auto; 
+        width: 100%; /* スマホ画面からはみ出さないように */
+    }
+
+    h2 { text-align: center; color: #1a73e8; margin-bottom: 25px; font-size: 1.4rem; }
+    label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+
+    /* inputとselectの幅を完全に一致させる */
+    select, input { 
+        width: 100%; 
+        padding: 12px; 
+        margin-bottom: 20px; 
+        border: 2px solid #dfe1e5; 
+        border-radius: 10px; 
+        font-size: 16px; 
+        display: block; /* ブロック要素として扱う */
+        -webkit-appearance: none; /* iOSのデフォルトスタイルをリセット */
+        appearance: none;
+        background-color: #fff;
+    }
+
+    /* セレクトボックスに矢印がないと使いにくいので追加（任意） */
+    select {
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        background-size: 15px;
+        padding-right: 40px;
+    }
+
+    .result-box { background: #f8f9fa; border: 2px solid #1a73e8; padding: 20px; border-radius: 10px; text-align: center; margin-top: 10px; }
+    .price { font-size: 1.8rem; font-weight: bold; color: #d93025; margin: 5px 0; }
+    .tax { font-size: 1rem; color: #70757a; }
+    .note { color: #f29900; font-weight: bold; margin-top: 	15px; text-align: center; min-height: 1.2em; font-size: 0.9rem; }
+	</style>
+</head>
+<body>
+
+<div class="card">
+    <h2>駆除費用シミュレーター</h2>
+
+    <label>🎯 サービス種別</label>
+    <select id="serviceType" onchange="calculate()">
+        <option value="gokiburi">ゴキブリ駆除 (法人/店舗)</option>
+        <option value="nezumi_biz">ネズミ駆除 (法人/店舗)</option>
+        <option value="nezumi_home">ネズミ駆除 (個人宅)</option>
+    </select>
+
+    <label>📐 面積 (坪数)</label>
+    <input type="number" id="area" value="10" min="1" step="0.5" oninput="calculate()">
+
+    <div class="result-box">
+        <div style="font-weight:bold;">概算お見積り (税抜)</div>
+        <div class="price" id="totalPrice">90,000 円</div>
+        <div class="tax" id="taxPrice">税込合計: 99,000 円</div>
+    </div>
+
+    <div id="alertNote" class="note"></div>
+</div>
+
+<script>
+function calculate() {
+    const type = document.getElementById('serviceType').value;
+    const area = parseFloat(document.getElementById('area').value) || 0;
+    let price = 0;
+    let note = "";
+
+    if (type === 'gokiburi') {
+        price = 90000;
+        if (area > 10) {
+            price += (area - 10) * 3000;
+        }
+    } else if (type === 'nezumi_biz') {
+        price = 320000;
+        if (area > 20) {
+            price += (area - 20) * 5000;
+        }
+    } else if (type === 'nezumi_home') {
+        price = 0;
+        note = "⚠️ 個人宅は別途お見積りとなります";
+    }
+
+    if (type === 'nezumi_home') {
+        document.getElementById('totalPrice').innerText = "要・現地調査";
+        document.getElementById('taxPrice').innerText = "別途算出";
+    } else {
+        document.getElementById('totalPrice').innerText = price.toLocaleString() + " 円";
+        document.getElementById('taxPrice').innerText = "税込合計: " + Math.floor(price * 1.1).toLocaleString() + " 円";
+    }
+    document.getElementById('alertNote').innerText = note;
+}
+</script>
+
+</body>
