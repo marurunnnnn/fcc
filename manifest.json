@@ -1,0 +1,15 @@
+﻿{
+  "name": "駆除費用シミュレーター",
+  "short_name": "駆除見積",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8bc34a",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
