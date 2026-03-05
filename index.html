@@ -12,10 +12,9 @@
     <link rel="apple-touch-icon" href="icon.png">
 
     <style>
-        /* 簡単なデザイン調整（必要に応じて会社で変更してください） */
         body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
         label { display: block; margin-top: 15px; font-weight: bold; }
-        select, input { width: 100%; padding: 10px; margin-top: 5px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        select, input { width: 100%; padding: 10px; margin-top: 5px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;}
         .result-box { margin-top: 25px; padding: 20px; background-color: #f1f8e9; border-radius: 8px; text-align: center; }
         .price { font-size: 24px; color: #333; font-weight: bold; margin: 10px 0; }
         .tax { font-size: 14px; color: #666; }
@@ -47,7 +46,6 @@
     </div>
 
     <script>
-        // --- 1. 計算ロジック ---
         function calculate() {
             const type = document.getElementById('serviceType').value;
             const area = parseFloat(document.getElementById('area').value) || 0;
@@ -79,7 +77,7 @@
             document.getElementById('alertNote').innerText = note;
         }
 
-        // --- 2. PWA登録スクリプト ---
+        // PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -91,3 +89,4 @@
 
 </body>
 </html>
+
