@@ -19,6 +19,14 @@
         .price { font-size: 24px; color: #333; font-weight: bold; margin: 10px 0; }
         .tax { font-size: 14px; color: #666; }
         .note { color: #d32f2f; font-size: 14px; margin-top: 10px; }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 <body>
@@ -34,7 +42,7 @@
         </select>
 
         <label>📐 面積 (坪数)</label>
-        <input type="number" id="area" value="" min="1" step="0.5" oninput="calculate()">
+        <input type="number" id="area" value="10" min="1" step="0.5" oninput="calculate()">
 
         <div class="result-box">
             <div style="font-weight:bold;">概算お見積り (税抜)</div>
@@ -89,6 +97,7 @@
 
 </body>
 </html>
+
 
 
 
