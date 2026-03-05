@@ -14,7 +14,7 @@
     <style>
         body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
         label { display: block; margin-top: 15px; font-weight: bold; }
-        select, input { width: 100%; padding: 10px; margin-top: 5px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;}
+        select, input { width: 100%; padding: 10px; margin-top: 5px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
         .result-box { margin-top: 25px; padding: 20px; background-color: #f1f8e9; border-radius: 8px; text-align: center; }
         .price { font-size: 24px; color: #333; font-weight: bold; margin: 10px 0; }
         .tax { font-size: 14px; color: #666; }
@@ -34,7 +34,7 @@
         </select>
 
         <label>📐 面積 (坪数)</label>
-        <input type="number" id="area" value="10" min="1" step="0.5" oninput="calculate()">
+        <input type="number" id="area" value="" min="1" step="0.5" oninput="calculate()">
 
         <div class="result-box">
             <div style="font-weight:bold;">概算お見積り (税抜)</div>
@@ -89,4 +89,5 @@
 
 </body>
 </html>
+
 
