@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>天気情報</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- iPhone用 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    input {
+      padding: 8px;
+      font-size: 16px;
+    }
+    button {
+      padding: 8px 12px;
+      font-size: 16px;
+    }
+    #weather {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>天気情報</h1>
+
+<input id="cityInput" placeholder="例：Fujisawa, JP">
+<button onclick="saveCity()">登録</button>
+
+<div id="weather">読み込み中...</div>
+
+<script>
+const apiKey = "04f70f5c20cca6c2bba4dd54ba444389";
+
+// 初期値（藤沢市）
+let city = localStorage.getItem("city") || "Fujisawa, JP";
+
+// 入力欄に反映
+document.getElementById("cityInput").value = city;
+
+// 天気取得
+function getWeather(city) {
+  fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=ja`)
+    .then(res => res.json())
+    .then(data => {
+
+      if (data.cod !== 200) {
+        document.getElementById("weather").innerHTML = "取得失敗（都市名を確認）";
+        return;
+      }
+
+      const weather = `
+        <p>場所: ${data.name}</p>
+        <p>天気: ${data.weather[0].description}</p>
+        <p>気温: ${data.main.temp}℃</p>
+      `;
+
+      document.getElementById("weather").innerHTML = weather;
+
+      // 雨チェック
+      if (data.weather[0].main === "Rain") {
+        document.getElementById("weather").innerHTML += "<p style='color:red;'>⚠ 雨です！施工注意！</p>";
+      }
+    });
+}
+
+// 保存ボタン
+function saveCity() {
+  const newCity = document.getElementById("cityInput").value;
+  localStorage.setItem("city", newCity);
+  getWeather(newCity);
+}
+
+// 初回実行
+getWeather(city);
+</script>
+
+</body>
+</html>
