@@ -6,29 +6,38 @@
 <title>天気情報</title>
 
 <style>
-body { font-family: sans-serif; margin: 0; padding: 0; }
+body {
+  font-family: sans-serif;
+  margin: 0;
+  background: #f5f5f5;
+}
 
-/* ハンバーガー */
+/* ヘッダー */
 .header {
+  background: rgba(0,0,0,0.7);
   color: white;
   padding: 15px;
   display: flex;
   align-items: center;
+  backdrop-filter: blur(8px);
 }
 
+/* ハンバーガー */
 .menu-btn {
   font-size: 24px;
   cursor: pointer;
   margin-right: 15px;
 }
 
+/* メニュー */
 .menu {
   position: fixed;
   top: 0;
-  left: -250px;
-  width: 200px;
+  left: -260px;
+  width: 220px;
   height: 100%;
-  background: #333;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
   color: white;
   padding: 20px;
   transition: 0.3s;
@@ -40,7 +49,8 @@ body { font-family: sans-serif; margin: 0; padding: 0; }
   display: block;
   color: white;
   text-decoration: none;
-  margin: 10px 0;
+  margin: 15px 0;
+  font-size: 18px;
 }
 
 /* コンテンツ */
@@ -49,7 +59,7 @@ body { font-family: sans-serif; margin: 0; padding: 0; }
 }
 
 input {
-  width: 70%;
+  width: 65%;
   padding: 10px;
   font-size: 16px;
 }
@@ -57,13 +67,17 @@ input {
 button {
   padding: 10px;
   font-size: 16px;
+  margin-left: 5px;
+  cursor: pointer;
 }
 
+/* 天気カード */
 .day {
   margin-top: 15px;
   padding: 15px;
-  background: #e3f2fd;
-  border-radius: 8px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 .rain { color: #1976d2; font-weight: bold; }
@@ -84,9 +98,9 @@ button {
 
 <div class="container">
 
-  <h3>地域設定</h3>
+  <h3>地域検索</h3>
   <input type="text" id="cityInput" placeholder="例: Fujisawa,JP">
-  <button onclick="saveCity()">検索</button>
+  <button onclick="searchCity()">検索</button>
 
   <div id="weather"></div>
 
@@ -99,7 +113,7 @@ function toggleMenu() {
   document.getElementById("menu").classList.toggle("open");
 }
 
-// 初期値（藤沢市）
+// 初期値（藤沢）
 let city = localStorage.getItem("city") || "Fujisawa,JP";
 document.getElementById("cityInput").value = city;
 
@@ -120,6 +134,11 @@ function getWeather(city) {
   fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric&lang=ja`)
     .then(res => res.json())
     .then(data => {
+
+      if (data.cod !== "200") {
+        document.getElementById("weather").innerHTML = "地域が見つかりません";
+        return;
+      }
 
       const daily = {};
 
@@ -157,23 +176,17 @@ function getWeather(city) {
         const first = getMainWeather(d.weathers.slice(0, half));
         const second = getMainWeather(d.weathers.slice(half));
 
-        let weatherText = "";
-        if (first === second) {
-          weatherText = jpWeather(first);
-        } else {
-          weatherText = `${jpWeather(first)}のち${jpWeather(second)}`;
-        }
+        let weatherText = (first === second)
+          ? jpWeather(first)
+          : `${jpWeather(first)}のち${jpWeather(second)}`;
 
         let label = ["今日", "明日", "明後日"][index];
 
-        let rainText = "";
-        if (rainProb >= 50) {
-          rainText = `<div class="rain">☔ ${rainProb}%（雨っぽい）</div>`;
-        } else if (rainProb >= 20) {
-          rainText = `<div>🌂 ${rainProb}%（微妙）</div>`;
-        } else {
-          rainText = `<div>☀ ${rainProb}%（ほぼ降らない）</div>`;
-        }
+        let rainText = rainProb >= 50
+          ? `<div class="rain">☔ ${rainProb}%（雨っぽい）</div>`
+          : rainProb >= 20
+          ? `<div>🌂 ${rainProb}%（微妙）</div>`
+          : `<div>☀ ${rainProb}%（ほぼ降らない）</div>`;
 
         html += `
           <div class="day">
@@ -189,12 +202,14 @@ function getWeather(city) {
     });
 }
 
-function saveCity() {
+// 🔍 検索ボタン
+function searchCity() {
   const newCity = document.getElementById("cityInput").value;
   localStorage.setItem("city", newCity);
   getWeather(newCity);
 }
 
+// 初回表示
 getWeather(city);
 </script>
 
