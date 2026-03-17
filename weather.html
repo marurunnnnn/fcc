@@ -35,7 +35,6 @@
       color: white;
       padding-top: 60px;
       transition: 0.3s;
-      z-index: 999;
     }
 
     #menu.open {
@@ -71,7 +70,7 @@
 
     .day {
       margin-top: 15px;
-      padding: 10px;
+      padding: 12px;
       background: #f1f8e9;
       border-radius: 8px;
     }
@@ -95,7 +94,7 @@
 
 <input id="cityInput" placeholder="例：Fujisawa, JP">
 <br>
-<button onclick="saveCity()">登録</button>
+<button onclick="saveCity()">検索</button>
 
 <div id="weather">読み込み中...</div>
 
@@ -119,29 +118,56 @@ function getWeather(city) {
         return;
       }
 
+      const daily = {};
+
+      data.list.forEach(item => {
+        const date = item.dt_txt.split(" ")[0];
+
+        if (!daily[date]) {
+          daily[date] = {
+            temps: [],
+            maxPop: 0
+          };
+        }
+
+        daily[date].temps.push(item.main.temp);
+
+        const pop = item.pop || 0;
+        if (pop > daily[date].maxPop) {
+          daily[date].maxPop = pop;
+        }
+      });
+
       let html = `<h3>${data.city.name}</h3>`;
 
-      for (let i = 0; i < 24; i += 8) {
-        const item = data.list[i];
+      const dates = Object.keys(daily).slice(0, 3);
 
-        const date = item.dt_txt;
-        const weather = item.weather[0].description;
-        const temp = item.main.temp;
+      dates.forEach((date, index) => {
+        const temps = daily[date].temps;
+        const max = Math.max(...temps).toFixed(1);
+        const min = Math.min(...temps).toFixed(1);
 
-        let rainAlert = "";
-        if (item.weather[0].main === "Rain") {
-          rainAlert = "<div class='rain'>⚠ 雨予報</div>";
+        const rainProb = Math.round(daily[date].maxPop * 100);
+
+        let label = ["今日", "明日", "明後日"][index];
+
+        let rainText = "";
+        if (rainProb >= 50) {
+          rainText = `<div class="rain">☔ 降水確率 ${rainProb}%（注意）</div>`;
+        } else if (rainProb > 0) {
+          rainText = `<div>🌂 降水確率 ${rainProb}%</div>`;
+        } else {
+          rainText = `<div>☀ 降水なし</div>`;
         }
 
         html += `
           <div class="day">
-            <b>${date}</b><br>
-            ${weather}<br>
-            ${temp}℃<br>
-            ${rainAlert}
+            <b>${label} (${date})</b><br>
+            最高: ${max}℃ / 最低: ${min}℃<br>
+            ${rainText}
           </div>
         `;
-      }
+      });
 
       document.getElementById("weather").innerHTML = html;
     });
@@ -178,7 +204,7 @@ getWeather(city);
       text-align: center;
     }
 
-    /* 🍔 */
+    /* 🍔メニュー */
     #menuButton {
       font-size: 28px;
       position: fixed;
@@ -258,7 +284,7 @@ getWeather(city);
 
 <input id="cityInput" placeholder="例：Fujisawa, JP">
 <br>
-<button onclick="saveCity()">検索</button>
+<button onclick="saveCity()">登録</button>
 
 <div id="weather">読み込み中...</div>
 
@@ -274,7 +300,7 @@ function toggleMenu() {
 let city = localStorage.getItem("city") || "Fujisawa, JP";
 document.getElementById("cityInput").value = city;
 
-// 天気取得
+// 天気取得（平均降水確率）
 function getWeather(city) {
   fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric&lang=ja`)
     .then(res => res.json())
@@ -293,16 +319,12 @@ function getWeather(city) {
         if (!daily[date]) {
           daily[date] = {
             temps: [],
-            maxPop: 0
+            pops: []
           };
         }
 
         daily[date].temps.push(item.main.temp);
-
-        const pop = item.pop || 0;
-        if (pop > daily[date].maxPop) {
-          daily[date].maxPop = pop;
-        }
+        daily[date].pops.push(item.pop || 0);
       });
 
       let html = `<h3>${data.city.name}</h3>`;
@@ -314,17 +336,19 @@ function getWeather(city) {
         const max = Math.max(...temps).toFixed(1);
         const min = Math.min(...temps).toFixed(1);
 
-        const rainProb = Math.round(daily[date].maxPop * 100);
+        // ⭐ 平均降水確率
+        const avgPop = daily[date].pops.reduce((a, b) => a + b, 0) / daily[date].pops.length;
+        const rainProb = Math.round(avgPop * 100);
 
         let label = ["今日", "明日", "明後日"][index];
 
         let rainText = "";
         if (rainProb >= 50) {
-          rainText = `<div class="rain">☔ 降水確率 ${rainProb}%（注意）</div>`;
-        } else if (rainProb > 0) {
-          rainText = `<div>🌂 降水確率 ${rainProb}%</div>`;
+          rainText = `<div class="rain">☔ ${rainProb}%（雨っぽい）</div>`;
+        } else if (rainProb >= 20) {
+          rainText = `<div>🌂 ${rainProb}%（微妙）</div>`;
         } else {
-          rainText = `<div>☀ 降水なし</div>`;
+          rainText = `<div>☀ ${rainProb}%（ほぼ降らない）</div>`;
         }
 
         html += `
